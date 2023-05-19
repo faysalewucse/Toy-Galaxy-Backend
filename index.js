@@ -43,10 +43,11 @@ async function run() {
       const limit = parseInt(req.query.limit) || 20;
       const skip = (page - 1) * limit;
 
+      const totalToys = await toys.estimatedDocumentCount();
       const cursor = toys.find().skip(skip).limit(limit);
 
       const result = await cursor.toArray();
-      res.send(result);
+      res.send({ result, totalToys });
     });
 
     app.get("/toy/:toyId", async (req, res) => {
@@ -56,6 +57,31 @@ async function run() {
       res.send(result);
     });
 
+    app.get("/mytoys/:userEmail", async (req, res) => {
+      const userEmail = req.params.userEmail;
+
+      const cursor = toys.find({
+        sellerEmail: userEmail,
+      });
+
+      const totalToys = await toys.countDocuments({ sellerEmail: userEmail });
+      const result = await cursor.toArray();
+      res.send({ result, totalToys });
+    });
+
+    app.patch("/toy/:toyId", async (req, res) => {
+      const filter = { _id: new ObjectId(req.params.toyId) };
+
+      const updateDoc = {
+        $set: {
+          price: req.body.price,
+          quantity: req.body.quantity,
+          description: req.body.description,
+        },
+      };
+      const result = await movies.updateOne(filter, updateDoc, options);
+      res.statusCode("200").send(result);
+    });
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
