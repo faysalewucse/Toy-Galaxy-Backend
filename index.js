@@ -4,9 +4,11 @@ require("dotenv").config();
 
 const app = express();
 app.use(cors());
+app.use(express.json());
+
 const port = process.env.PORT || 5000;
 
-app.use("/", (req, res) => {
+app.get("/", (req, res) => {
   res.send("Toy Galaxy Server is running.");
 });
 
@@ -26,6 +28,14 @@ async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
+
+    app.post("/addtoy", async (req, res) => {
+      const toyData = req.body;
+      const database = client.db("toygalaxyDB");
+      const toys = database.collection("toys");
+      const result = await toys.insertOne(toyData);
+      res.send(result);
+    });
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
