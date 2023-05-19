@@ -12,7 +12,7 @@ app.get("/", (req, res) => {
   res.send("Toy Galaxy Server is running.");
 });
 
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const uri = process.env.MONGODB_URL;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -46,6 +46,13 @@ async function run() {
       const cursor = toys.find().skip(skip).limit(limit);
 
       const result = await cursor.toArray();
+      res.send(result);
+    });
+
+    app.get("/toy/:toyId", async (req, res) => {
+      const result = await toys.findOne({
+        _id: new ObjectId(req.params.toyId),
+      });
       res.send(result);
     });
 
