@@ -29,13 +29,26 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
 
+    const database = client.db("toygalaxyDB");
+    const toys = database.collection("toys");
+
     app.post("/addtoy", async (req, res) => {
       const toyData = req.body;
-      const database = client.db("toygalaxyDB");
-      const toys = database.collection("toys");
       const result = await toys.insertOne(toyData);
       res.send(result);
     });
+
+    app.get("/toys", async (req, res) => {
+      const page = parseInt(req.query.pageNumber) || 1;
+      const limit = parseInt(req.query.limit) || 20;
+      const skip = (page - 1) * limit;
+
+      const cursor = toys.find().skip(skip).limit(limit);
+
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
