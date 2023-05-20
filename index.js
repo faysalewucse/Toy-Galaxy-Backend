@@ -59,12 +59,18 @@ async function run() {
 
     app.get("/mytoys/:userEmail", async (req, res) => {
       const userEmail = req.params.userEmail;
+      const sortOrder = req.query.sortOrder;
 
-      const cursor = toys.find({
-        sellerEmail: userEmail,
-      });
+      let query = { sellerEmail: userEmail };
+      let sortQuery = {};
 
-      const totalToys = await toys.countDocuments({ sellerEmail: userEmail });
+      if (sortOrder) {
+        sortQuery = { price: parseInt(sortOrder) };
+      }
+
+      const cursor = toys.find(query, { sort: sortQuery });
+
+      const totalToys = await toys.countDocuments(query);
       const result = await cursor.toArray();
       res.send({ result, totalToys });
     });
@@ -76,8 +82,8 @@ async function run() {
 
       const updateDoc = {
         $set: {
-          price: price,
-          quantity: quantity,
+          price: parseInt(price),
+          quantity: parseInt(quantity),
           description: description,
         },
       };
@@ -99,7 +105,6 @@ async function run() {
     app.get("/toys/:category", async (req, res) => {
       const query = { subCategory: req.params.category };
 
-      console.log(req.params.category);
       const cursor = toys.find(query);
       const result = await cursor.toArray();
 
