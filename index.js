@@ -84,6 +84,18 @@ async function run() {
       const result = await toys.updateOne(filter, updateDoc);
       res.status(200).send(result);
     });
+
+    app.delete("/toy/:toyId", async (req, res) => {
+      const query = { _id: new ObjectId(req.params.toyId) };
+
+      const result = await toys.deleteOne(query);
+      if (result.deletedCount === 1) {
+        res.status(200).send(result);
+      } else {
+        res.status(401).send(result);
+      }
+    });
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
