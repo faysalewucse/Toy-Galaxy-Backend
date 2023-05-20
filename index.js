@@ -96,6 +96,16 @@ async function run() {
       }
     });
 
+    app.get("/toys/:category", async (req, res) => {
+      const query = { subCategory: req.params.category };
+
+      console.log(req.params.category);
+      const cursor = toys.find(query);
+      const result = await cursor.toArray();
+
+      res.send(result);
+    });
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
